@@ -1,13 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const configuredApiBaseUrl = process.env.API_BASE_URL;
-if (!configuredApiBaseUrl) {
-  throw new Error('API_BASE_URL must be set when building the production frontend.');
-}
+const configuredApiBaseUrl = process.env.API_BASE_URL || 'https://venuevista-pkeq.onrender.com/api';
 
-const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
-if (!razorpayKeyId || !razorpayKeyId.startsWith('rzp_test_')) {
+const razorpayKeyId = process.env.RAZORPAY_KEY_ID || '';
+if (razorpayKeyId && !razorpayKeyId.startsWith('rzp_test_')) {
   throw new Error('RAZORPAY_KEY_ID must be a Razorpay Test Mode key when building the production frontend.');
 }
 
