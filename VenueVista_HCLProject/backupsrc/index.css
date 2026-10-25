@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  background-color: #09090b;
+  font-family: 'Inter', sans-serif;
+  color: #f4f4f5;
+}
+
+.font-display {
+  font-family: 'Orbitron', sans-serif;
+}
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Ticker Marquee ──────────────────────────────────────── */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 28s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* ── Glow Effects ────────────────────────────────────────── */
+.glow-acid {
+  box-shadow: 0 0 20px rgba(163, 255, 18, 0.4), 0 0 60px rgba(163, 255, 18, 0.15);
+}
+.glow-purple {
+  box-shadow: 0 0 20px rgba(155, 48, 255, 0.5), 0 0 60px rgba(155, 48, 255, 0.2);
+}
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4), 0 0 60px rgba(0, 245, 255, 0.15);
+}
+.glow-pink {
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.4), 0 0 60px rgba(255, 20, 147, 0.15);
+}
+
+/* ── Glassmorphism ───────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Neobrutalist Borders ────────────────────────────────── */
+.neo-border-acid {
+  border: 2px solid rgba(163, 255, 18, 0.6);
+}
+.neo-border-purple {
+  border: 2px solid rgba(155, 48, 255, 0.6);
+}
+.neo-border-cyan {
+  border: 2px solid rgba(0, 245, 255, 0.6);
+}
+.neo-border-pink {
+  border: 2px solid rgba(255, 20, 147, 0.6);
+}
+
+/* ── Gradient Text ───────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #a3ff12 0%, #00f5ff 40%, #ff1493 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-purple {
+  background: linear-gradient(135deg, #9b30ff 0%, #00f5ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Card Tilt ───────────────────────────────────────────── */
+.card-tilt {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-tilt:hover {
+  transform: rotate(-1deg) scale(1.01);
+}
+
+/* ── Glitch Hover ────────────────────────────────────────── */
+.glitch-hover:hover {
+  animation: glitch 0.3s ease;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); filter: hue-rotate(30deg); }
+  40% { transform: translate(2px, -2px); filter: hue-rotate(-30deg); }
+  60% { transform: translate(-1px, 1px); }
+  80% { transform: translate(1px, -1px); filter: hue-rotate(15deg); }
+  100% { transform: translate(0); filter: hue-rotate(0); }
+}
+
+/* ── Pulse Glow ──────────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse-dot {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+/* ── Scan Line ───────────────────────────────────────────── */
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* ── QR Code Pattern ─────────────────────────────────────── */
+.qr-pattern {
+  background-image:
+    repeating-conic-gradient(#f4f4f5 0% 25%, transparent 0% 50%);
+  background-size: 8px 8px;
+}

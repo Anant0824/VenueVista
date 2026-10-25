@@ -1,0 +1,54 @@
+<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b border-white/5 bg-zinc-950/60 anim-fade-up">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <a routerLink="/" class="flex items-center gap-2 cursor-pointer">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-acid to-neon-cyan flex items-center justify-center">
+        <app-icon name="zap" cssClass="w-4 h-4 text-zinc-950" [strokeWidth]="3" />
+      </div>
+      <span class="font-display font-black text-lg tracking-wider text-white">
+        VENUE<span class="text-acid">VISTA</span>
+      </span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-8">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="text-acid"
+          [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+          class="hover:text-acid transition-colors duration-200 font-mono text-xs tracking-widest uppercase cursor-pointer text-zinc-400"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </div>
+
+    @if (isLoggedIn()) {
+      <button
+        (click)="logout()"
+        class="glass px-4 py-2 rounded-full text-xs font-mono tracking-widest uppercase text-rose-400 neo-border-rose cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+      >
+        Logout
+      </button>
+    } @else {
+      <a
+        routerLink="/login"
+        class="glass px-4 py-2 rounded-full text-xs font-mono tracking-widest uppercase text-acid neo-border-acid cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+      >
+        Login
+      </a>
+    }
+  </div>
+
+  <div class="md:hidden flex items-center justify-center gap-6 pb-2">
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="text-acid"
+        [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+        class="font-mono text-xs tracking-widest uppercase cursor-pointer text-zinc-400"
+      >
+        {{ item.label }}
+      </a>
+    }
+  </div>
+</nav>

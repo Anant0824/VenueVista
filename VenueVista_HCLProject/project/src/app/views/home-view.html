@@ -1,0 +1,53 @@
+<div class="pt-20">
+  <section class="relative min-h-[55vh] flex items-center justify-center overflow-hidden px-4">
+    <div
+      class="absolute inset-0 opacity-20"
+      style="background-image: linear-gradient(rgba(163,255,18,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(163,255,18,0.1) 1px, transparent 1px); background-size: 60px 60px;"
+    ></div>
+    <div class="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-acid/10 blur-[120px]"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-electric-purple/10 blur-[120px]"></div>
+
+    <div class="relative z-10 text-center max-w-4xl">
+      <div class="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6 anim-fade-up">
+        <app-icon name="sparkles" cssClass="w-4 h-4 text-acid" />
+        <span class="text-xs font-mono text-zinc-300 tracking-widest uppercase">
+          The Future of Live Events
+        </span>
+      </div>
+
+      <h1 class="font-display text-5xl sm:text-7xl font-black leading-[1.1] mb-4 anim-fade-up">
+        <span class="gradient-text">Rule the Venue.</span>
+        <br />
+        <span class="gradient-text-purple">Own the Vibe.</span>
+      </h1>
+
+      <p class="text-zinc-400 text-base sm:text-lg max-w-xl mx-auto mb-8 anim-fade-up">
+        Secure your spot at the most underground, hyper-curated events. No fluff. Just pure energy.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <app-icon name="trending-up" cssClass="w-5 h-5 text-acid" />
+        <h2 class="font-display text-2xl font-bold text-white">Upcoming Events</h2>
+      </div>
+      <span class="text-xs font-mono text-zinc-500 tracking-widest uppercase">
+        {{ events().length }} events live
+      </span>
+    </div>
+
+    @if (events().length === 0) {
+      <div class="glass rounded-2xl p-12 text-center">
+        <p class="text-zinc-400 font-mono text-sm">No events yet. Check back soon.</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        @for (event of events(); track event.id; let i = $index) {
+          <app-event-card [event]="event" [index]="i" (buy)="onBuy($event)" />
+        }
+      </div>
+    }
+  </section>
+</div>

@@ -1,0 +1,109 @@
+@if (isOpen() && event(); as ev) {
+  <div
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md"
+    (click)="close()"
+  >
+    <div
+      class="glass rounded-2xl w-full max-w-md p-6 relative neo-border-cyan glow-cyan anim-modal"
+      (click)="stop($event)"
+    >
+      <button
+        type="button"
+        (click)="close()"
+        class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-neon-pink/20 flex items-center justify-center transition-colors cursor-pointer"
+      >
+        <app-icon name="x" cssClass="w-4 h-4 text-zinc-400" />
+      </button>
+
+      <div class="mb-6">
+        <p class="text-xs font-mono text-neon-cyan tracking-widest uppercase mb-1">Checkout</p>
+        <h2 class="font-display text-2xl font-black text-white leading-tight">{{ ev.title }}</h2>
+        <p class="text-sm text-zinc-400 mt-1 font-mono">{{ ev.date }} · {{ ev.venue }}</p>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">
+          Ticket Type
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            (click)="ticketType.set('GA')"
+            [disabled]="processing()"
+            class="px-3 py-3 rounded-xl text-sm font-mono transition-all cursor-pointer"
+            [class]="ticketType() === 'GA'
+                ? 'bg-acid/15 neo-border-acid text-acid glow-acid'
+                : 'bg-white/5 border border-white/10 text-zinc-400 hover:border-white/20'"
+          >
+            GA
+            <span class="block text-xs text-zinc-500 mt-1">₹{{ ev.basePrice }}</span>
+          </button>
+          <button
+            type="button"
+            (click)="ticketType.set('VIP')"
+            [disabled]="processing()"
+            class="px-3 py-3 rounded-xl text-sm font-mono transition-all cursor-pointer"
+            [class]="ticketType() === 'VIP'
+                ? 'bg-electric-purple/20 neo-border-purple text-white glow-purple'
+                : 'bg-white/5 border border-white/10 text-zinc-400 hover:border-white/20'"
+          >
+            VIP
+            <span class="block text-xs text-zinc-500 mt-1">₹{{ vipPrice() }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">
+          Quantity
+        </label>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="decQty()"
+            [disabled]="processing()"
+            class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 hover:border-acid/50 flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <app-icon name="minus" cssClass="w-4 h-4 text-zinc-300" />
+          </button>
+          <span class="font-mono text-2xl font-bold text-white w-12 text-center">{{ quantity() }}</span>
+          <button
+            type="button"
+            (click)="incQty()"
+            [disabled]="processing()"
+            class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 hover:border-acid/50 flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <app-icon name="plus" cssClass="w-4 h-4 text-zinc-300" />
+          </button>
+        </div>
+      </div>
+
+      <div class="glass rounded-xl p-4 mb-5 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <app-icon name="ticket" cssClass="w-5 h-5 text-neon-cyan" />
+          <span class="text-sm font-mono text-zinc-400">Total</span>
+        </div>
+        <span class="font-mono text-3xl font-bold text-acid">₹{{ total() }}</span>
+      </div>
+
+      <p class="text-xs text-zinc-500 font-mono mb-3">Secure payment processed by Razorpay (Test Mode).</p>
+
+      <button
+        type="button"
+        (click)="confirm()"
+        [disabled]="processing()"
+        class="w-full py-4 rounded-xl bg-gradient-to-r from-acid to-neon-cyan text-zinc-950 font-display font-bold text-sm tracking-widest uppercase disabled:opacity-50 cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform"
+      >
+        @if (processing()) {
+          <app-icon name="loader" cssClass="w-4 h-4 animate-spin inline-block mr-2" />
+          Creating secure order...
+        } @else {
+          Pay with Razorpay
+        }
+      </button>
+      @if (paymentError(); as err) {
+        <p class="mt-3 text-xs font-mono text-neon-pink">{{ err }}</p>
+      }
+    </div>
+  </div>
+}

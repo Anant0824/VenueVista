@@ -1,0 +1,76 @@
+<div class="pt-24 max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+  <div class="mb-10">
+    <h1 class="font-display text-4xl font-black text-white mb-2">
+      My <span class="gradient-text">Stash</span>
+    </h1>
+    <p class="text-zinc-400 font-mono text-sm">
+      Your digital tickets. Scan at the gate. No paper, no cap.
+    </p>
+  </div>
+
+  @if (tickets().length === 0) {
+    <div class="glass rounded-2xl p-16 text-center anim-fade-up">
+      <app-icon name="ticket" cssClass="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+      <p class="font-display text-xl text-zinc-400 font-bold mb-2">Your stash is empty</p>
+      <p class="text-sm text-zinc-500 font-mono">Head to Home and grab some tickets.</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (ticket of tickets(); track ticket.id; let i = $index) {
+        <div
+          class="glass rounded-2xl overflow-hidden transition-shadow hover:scale-[1.02] hover:-rotate-1 anim-fade-up"
+          [class]="accent(i).border + ' ' + accent(i).glow"
+          [style.animation-delay.ms]="i * 100"
+        >
+          <div class="bg-gradient-to-r to-transparent px-5 py-3 flex items-center justify-between" [class]="accent(i).gradient">
+            <span class="font-mono text-xs font-bold tracking-widest uppercase" [class]="accent(i).text">
+              {{ ticket.ticketType }}
+            </span>
+            <span class="font-mono text-xs text-zinc-400">{{ ticket.quantity }}x</span>
+          </div>
+
+          <div class="p-5">
+            <h3 class="font-display text-xl font-bold text-white leading-tight mb-3">
+              {{ ticket.eventTitle }}
+            </h3>
+            <div class="space-y-1.5 mb-4">
+              <div class="flex items-center gap-2 text-sm text-zinc-400 font-mono">
+                <app-icon name="calendar" cssClass="w-3.5 h-3.5" />
+                <span>{{ ticket.eventDate }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-sm text-zinc-400 font-mono">
+                <app-icon name="map-pin" cssClass="w-3.5 h-3.5" />
+                <span>{{ ticket.eventVenue }}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div class="relative w-24 h-24 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                <div class="qr-pattern absolute inset-2 opacity-80"></div>
+                <app-icon name="qr" [cssClass]="'w-8 h-8 relative z-10 opacity-60 ' + accent(i).text" />
+              </div>
+              <div class="flex-1">
+                <p class="text-xs font-mono text-zinc-500 mb-1">Scan at gate</p>
+                <p class="font-mono text-xs text-zinc-600 break-all">
+                  ID: {{ shortId(ticket) }}
+                </p>
+                <p class="font-mono text-lg font-bold mt-2" [class]="accent(i).text">
+                  ₹{{ ticket.totalPrice }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-dashed border-white/10 px-5 py-2 flex justify-between items-center">
+            <span class="font-mono text-xs text-zinc-500">
+              {{ ticket.ticketType === 'VIP' ? 'VIP ACCESS' : 'GENERAL ADMISSION' }}
+            </span>
+            <span class="font-mono text-xs text-zinc-600">
+              {{ ticket.quantity }} {{ ticket.quantity > 1 ? 'tickets' : 'ticket' }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

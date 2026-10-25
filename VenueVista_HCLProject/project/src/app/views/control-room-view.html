@@ -1,0 +1,243 @@
+<div class="pt-24 max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+  <div class="mb-10">
+    <h1 class="font-display text-4xl font-black text-white mb-2">
+      Control <span class="gradient-text">Room</span>
+    </h1>
+    <p class="text-zinc-400 font-mono text-sm">
+      Organizer dashboard. Track revenue, monitor sales, drop new events.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
+    <div class="glass rounded-2xl p-6 neo-border-acid glow-acid anim-fade-up">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+          <app-icon name="dollar" cssClass="w-5 h-5 text-acid" />
+        </div>
+      </div>
+      <p class="font-mono text-xs text-zinc-500 tracking-widest uppercase mb-1">Total Revenue</p>
+      <p class="font-mono text-3xl font-bold text-acid">₹{{ totalRevenue().toLocaleString() }}</p>
+    </div>
+    <div class="glass rounded-2xl p-6 neo-border-cyan glow-cyan anim-fade-up" style="animation-delay: 100ms;">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+          <app-icon name="ticket" cssClass="w-5 h-5 text-neon-cyan" />
+        </div>
+      </div>
+      <p class="font-mono text-xs text-zinc-500 tracking-widest uppercase mb-1">Tickets Sold</p>
+      <p class="font-mono text-3xl font-bold text-neon-cyan">{{ ticketsSold().toLocaleString() }}</p>
+    </div>
+    <div class="glass rounded-2xl p-6 neo-border-pink glow-pink anim-fade-up" style="animation-delay: 200ms;">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+          <app-icon name="calendar-plus" cssClass="w-5 h-5 text-neon-pink" />
+        </div>
+      </div>
+      <p class="font-mono text-xs text-zinc-500 tracking-widest uppercase mb-1">Active Events</p>
+      <p class="font-mono text-3xl font-bold text-neon-pink">{{ activeEvents() }}</p>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-3 mb-6" role="tablist" aria-label="Control Room sections">
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'events'"
+      (click)="selectTab('events')"
+      class="px-5 py-3 rounded-xl font-mono text-sm tracking-wide transition-colors"
+      [class]="activeTab() === 'events'
+        ? 'bg-electric-purple/20 text-electric-purple border border-electric-purple/50'
+        : 'bg-white/5 text-zinc-400 border border-white/10 hover:border-white/20'"
+    >
+      Event Management
+    </button>
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'users'"
+      (click)="selectTab('users')"
+      class="px-5 py-3 rounded-xl font-mono text-sm tracking-wide transition-colors"
+      [class]="activeTab() === 'users'
+        ? 'bg-electric-purple/20 text-electric-purple border border-electric-purple/50'
+        : 'bg-white/5 text-zinc-400 border border-white/10 hover:border-white/20'"
+    >
+      User Management
+    </button>
+  </div>
+
+  @if (activeTab() === 'events') {
+  <div class="glass rounded-2xl p-6 sm:p-8 neo-border-purple anim-fade-up">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-electric-purple/15 flex items-center justify-center">
+        <app-icon name="plus" cssClass="w-5 h-5 text-electric-purple" />
+      </div>
+      <div>
+        <h2 class="font-display text-xl font-bold text-white">Quick Event Creator</h2>
+        <p class="text-xs font-mono text-zinc-500">Drop a new event. It goes live instantly.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Event Title</label>
+        <input [class]="inputClass" placeholder="e.g. Neon Dreams" [(ngModel)]="form.title" name="title" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Date</label>
+        <input
+          [class]="inputClass"
+          type="date"
+          [min]="minDate"
+          style="color-scheme: dark"
+          [(ngModel)]="form.date"
+          name="date"
+        />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Artist</label>
+        <input [class]="inputClass" placeholder="e.g. The Midnight" [(ngModel)]="form.artist" name="artist" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">City</label>
+        <input [class]="inputClass" placeholder="e.g. Los Angeles" [(ngModel)]="form.city" name="city" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Genre</label>
+        <input [class]="inputClass" placeholder="e.g. Electronic" [(ngModel)]="form.genre" name="genre" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Time</label>
+        <input [class]="inputClass" type="time" [(ngModel)]="form.time" name="time" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Venue Name</label>
+        <input [class]="inputClass" placeholder="e.g. Sector 7 Arena" [(ngModel)]="form.venue" name="venue" />
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Image URL</label>
+        <input
+          [class]="inputClass"
+          type="url"
+          required
+          placeholder="https://example.com/event-image.jpg"
+          [(ngModel)]="form.image"
+          name="image"
+        />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Total Capacity</label>
+        <input
+          [class]="inputClass"
+          type="number"
+          min="1"
+          step="1"
+          required
+          placeholder="e.g. 5000"
+          [(ngModel)]="form.capacity"
+          name="capacity"
+          (keydown)="blockInvalidKeys($event)"
+        />
+        @if (capacityInvalid()) {
+          <p class="mt-1 text-xs font-mono text-neon-pink">Capacity can't be negative.</p>
+        }
+      </div>
+      <div class="sm:col-span-2">
+        <label class="block text-xs font-mono text-zinc-400 tracking-widest uppercase mb-2">Base Price (INR)</label>
+        <input
+          [class]="inputClass"
+          type="number"
+          min="0"
+          step="0.01"
+          required
+          placeholder="e.g. 75"
+          [(ngModel)]="form.basePrice"
+          name="basePrice"
+          (keydown)="blockInvalidKeys($event)"
+        />
+        @if (priceInvalid()) {
+          <p class="mt-1 text-xs font-mono text-neon-pink">Price can't be negative.</p>
+        }
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="publish()"
+      [disabled]="!canPublish()"
+      class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-electric-purple to-neon-pink text-white font-display font-bold text-sm tracking-widest uppercase disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-transform"
+    >
+      @if (publishing()) {
+        <app-icon name="loader" cssClass="w-4 h-4 animate-spin" />
+        Publishing...
+      } @else if (flash()) {
+        Event Published!
+      } @else {
+        Publish Event
+      }
+    </button>
+  </div>
+  } @else {
+    <section class="glass rounded-2xl p-6 sm:p-8 neo-border-cyan anim-fade-up">
+      <div class="mb-6">
+        <h2 class="font-display text-xl font-bold text-white">User Management</h2>
+        <p class="text-xs font-mono text-zinc-500 mt-1">Manage attendee and organizer access.</p>
+      </div>
+
+      @if (userError(); as error) {
+        <p class="mb-4 text-sm font-mono text-neon-pink" role="alert">{{ error }}</p>
+      }
+
+      @if (loadingUsers()) {
+        <p class="text-sm font-mono text-zinc-400">Loading users...</p>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[640px] text-left">
+            <thead>
+              <tr class="border-b border-white/10 text-xs font-mono text-zinc-500 tracking-widest uppercase">
+                <th class="px-4 py-3 font-normal">Username</th>
+                <th class="px-4 py-3 font-normal">Email</th>
+                <th class="px-4 py-3 font-normal">Current Role</th>
+                <th class="px-4 py-3 font-normal text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users(); track user.id) {
+                <tr class="border-b border-white/5 text-sm text-zinc-300">
+                  <td class="px-4 py-4 font-mono">{{ user.username }}</td>
+                  <td class="px-4 py-4 font-mono text-zinc-400">{{ user.email || '—' }}</td>
+                  <td class="px-4 py-4 font-mono">
+                    <span [class]="user.role === 'ROLE_CREATOR' ? 'text-electric-purple' : 'text-neon-cyan'">
+                      {{ user.role === 'ROLE_CREATOR' ? 'Organizer' : 'Attendee' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-4 text-right">
+                    <button
+                      type="button"
+                      (click)="toggleUserRole(user)"
+                      [disabled]="updatingUserId() !== null"
+                      class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-xs font-mono text-zinc-200 hover:border-electric-purple/50 hover:text-white disabled:opacity-50 transition-colors"
+                    >
+                      @if (updatingUserId() === user.id) {
+                        Updating...
+                      } @else if (user.role === 'ROLE_USER') {
+                        Promote to Organizer
+                      } @else {
+                        Demote to Attendee
+                      }
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="px-4 py-8 text-center text-sm font-mono text-zinc-500">
+                    No users found.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>
