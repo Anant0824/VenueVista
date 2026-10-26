@@ -67,7 +67,8 @@ export interface ManagedUser {
   id: number;
   username: string;
   email: string | null;
-  role: 'ROLE_USER' | 'ROLE_CREATOR';
+  role: 'ROLE_USER' | 'ROLE_CREATOR' | 'ROLE_ADMIN';
+  roles: string[];
 }
 
 export interface Accent {

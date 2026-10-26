@@ -37,7 +37,9 @@ export class LoginView {
     request.subscribe({
       next: (response) => {
         this.loading.set(false);
-        this.router.navigateByUrl(response.role === 'ROLE_CREATOR' ? '/control-room' : '/');
+        this.router.navigateByUrl(
+          response.role === 'ROLE_CREATOR' || response.role === 'ROLE_ADMIN' ? '/control-room' : '/',
+        );
       },
       error: (err) => {
         this.loading.set(false);

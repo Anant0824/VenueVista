@@ -38,12 +38,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight checks
                         .requestMatchers("/api/auth/**").permitAll()         // Allow login/signup
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("CREATOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("CREATOR")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("CREATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("CREATOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll() // Allow public event viewing on load
-                        .requestMatchers(HttpMethod.POST, "/api/events/**").hasRole("CREATOR")
-                        .requestMatchers(HttpMethod.PUT, "/api/events/**").hasRole("CREATOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/events/**").hasRole("CREATOR")
+                        .requestMatchers(HttpMethod.POST, "/api/events/**").hasAnyRole("CREATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/events/**").hasAnyRole("CREATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/events/**").hasAnyRole("CREATOR", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

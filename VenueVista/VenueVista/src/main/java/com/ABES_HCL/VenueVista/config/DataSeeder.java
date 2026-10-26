@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
+
+import java.util.Set;
 
 @Configuration
 public class DataSeeder {
@@ -30,6 +33,22 @@ public class DataSeeder {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CommandLineRunner migrateLegacyUserRoles(JdbcTemplate jdbcTemplate) {
+        return args -> jdbcTemplate.update("""
+                INSERT INTO user_roles (user_id, role)
+                SELECT users.id, users.role
+                FROM users
+                WHERE users.role IS NOT NULL
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM user_roles
+                      WHERE user_roles.user_id = users.id
+                        AND user_roles.role = users.role
+                  )
+                """);
     }
 
     @Bean
@@ -56,11 +75,12 @@ public class DataSeeder {
                     .username(adminUsername.trim())
                     .email(adminEmail.trim().toLowerCase())
                     .password(passwordEncoder.encode(adminPassword))
-                    .role("ROLE_CREATOR")
+                    .role("ROLE_ADMIN")
+                    .roles(Set.of("ROLE_ADMIN"))
                     .build();
 
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-                userRepository.deleteAllInBatch();
+                userRepository.deleteAll();
                 userRepository.save(admin);
             });
             System.out.println("VenueVista: configured admin account seeded; existing users were removed.");

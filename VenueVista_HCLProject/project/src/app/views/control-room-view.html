@@ -206,25 +206,41 @@
                   <td class="px-4 py-4 font-mono">{{ user.username }}</td>
                   <td class="px-4 py-4 font-mono text-zinc-400">{{ user.email || '—' }}</td>
                   <td class="px-4 py-4 font-mono">
-                    <span [class]="user.role === 'ROLE_CREATOR' ? 'text-electric-purple' : 'text-neon-cyan'">
-                      {{ user.role === 'ROLE_CREATOR' ? 'Organizer' : 'Attendee' }}
+                    <span [class]="user.role !== 'ROLE_USER' ? 'text-electric-purple' : 'text-neon-cyan'">
+                      {{ user.role === 'ROLE_ADMIN' ? 'Admin' : user.role === 'ROLE_CREATOR' ? 'Organizer' : 'Attendee' }}
                     </span>
                   </td>
                   <td class="px-4 py-4 text-right">
-                    <button
-                      type="button"
-                      (click)="toggleUserRole(user)"
-                      [disabled]="updatingUserId() !== null"
-                      class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-xs font-mono text-zinc-200 hover:border-electric-purple/50 hover:text-white disabled:opacity-50 transition-colors"
-                    >
-                      @if (updatingUserId() === user.id) {
-                        Updating...
-                      } @else if (user.role === 'ROLE_USER') {
-                        Promote to Organizer
-                      } @else {
-                        Demote to Attendee
-                      }
-                    </button>
+                    @if (user.role !== 'ROLE_ADMIN') {
+                      <div class="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          (click)="toggleUserRole(user)"
+                          [disabled]="updatingUserId() !== null"
+                          class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-xs font-mono text-zinc-200 hover:border-electric-purple/50 hover:text-white disabled:opacity-50 transition-colors"
+                        >
+                          @if (updatingUserId() === user.id) {
+                            Updating...
+                          } @else if (user.role === 'ROLE_USER') {
+                            Promote to Organizer
+                          } @else {
+                            Demote to Attendee
+                          }
+                        </button>
+                        <button
+                          type="button"
+                          (click)="promoteUser(user)"
+                          [disabled]="updatingUserId() !== null"
+                          class="px-4 py-2 rounded-lg border border-electric-purple/30 bg-electric-purple/10 text-xs font-mono text-electric-purple hover:border-electric-purple/60 hover:text-white disabled:opacity-50 transition-colors"
+                        >
+                          @if (updatingUserId() === user.id) {
+                            Updating...
+                          } @else {
+                            Promote to Admin
+                          }
+                        </button>
+                      </div>
+                    }
                   </td>
                 </tr>
               } @empty {

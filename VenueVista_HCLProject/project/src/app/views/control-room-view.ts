@@ -96,6 +96,28 @@ export class ControlRoomView {
     });
   }
 
+  promoteUser(user: ManagedUser): void {
+    if (this.updatingUserId() !== null || user.role === 'ROLE_ADMIN') {
+      return;
+    }
+
+    this.updatingUserId.set(user.id);
+    this.userError.set(null);
+    this.api.promoteUser(String(user.id)).subscribe({
+      next: (updatedUser) => {
+        this.users.update((users) =>
+          users.map((currentUser) => currentUser.id === updatedUser.id ? updatedUser : currentUser),
+        );
+        this.updatingUserId.set(null);
+      },
+      error: (err) => {
+        console.error(`Failed to promote user ${user.id} to admin.`, err);
+        this.userError.set(`Unable to promote ${user.username} to admin. Please verify master admin access and try again.`);
+        this.updatingUserId.set(null);
+      },
+    });
+  }
+
   priceInvalid(): boolean {
     const price = Number(this.form.basePrice);
     return this.form.basePrice !== '' && (!Number.isFinite(price) || price < 0);

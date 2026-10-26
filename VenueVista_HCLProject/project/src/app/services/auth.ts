@@ -9,6 +9,7 @@ import { VenueStore } from './venue.store';
 interface AuthResponse {
   token: string;
   role: string;
+  roles: string[];
   username: string;
 }
 
@@ -77,6 +78,6 @@ export class AuthService {
   }
 
   isCreator(): boolean {
-    return this.currentUserRole() === 'ROLE_CREATOR';
+    return this.currentUserRole() === 'ROLE_CREATOR' || this.currentUserRole() === 'ROLE_ADMIN';
   }
 }

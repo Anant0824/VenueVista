@@ -20,7 +20,7 @@ const creatorGuard = () => {
   const role = localStorage.getItem('role');
   console.log('🛡️ Browser Guard Check - Role:', role);
 
-  if (role === 'ROLE_CREATOR') {
+  if (role === 'ROLE_CREATOR' || role === 'ROLE_ADMIN') {
     return true;
   }
 

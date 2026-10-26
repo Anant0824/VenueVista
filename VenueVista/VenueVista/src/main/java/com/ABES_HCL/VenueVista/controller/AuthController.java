@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -71,6 +72,7 @@ public class AuthController {
                 .email(email)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("ROLE_USER")
+                .roles(Set.of("ROLE_USER"))
                 .build();
         userRepository.save(user);
 
@@ -83,7 +85,8 @@ public class AuthController {
         return Map.of(
                 "token", token,
                 "username", user.getUsername(),
-                "role", user.getRole()
+                "role", user.getRole(),
+                "roles", user.getRoles()
         );
     }
 }
