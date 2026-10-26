@@ -86,7 +86,13 @@
         <span class="font-mono text-3xl font-bold text-acid">₹{{ total() }}</span>
       </div>
 
-      <p class="text-xs text-zinc-500 font-mono mb-3">Secure payment processed by Razorpay (Test Mode).</p>
+      <p class="text-xs text-zinc-500 font-mono mb-3">
+        @if (isFree()) {
+          No payment required for this event.
+        } @else {
+          Secure payment processed by Razorpay (Test Mode).
+        }
+      </p>
 
       <button
         type="button"
@@ -96,9 +102,17 @@
       >
         @if (processing()) {
           <app-icon name="loader" cssClass="w-4 h-4 animate-spin inline-block mr-2" />
-          Creating secure order...
+          @if (isFree()) {
+            Registering ticket...
+          } @else {
+            Creating secure order...
+          }
         } @else {
-          Pay with Razorpay
+          @if (isFree()) {
+            Register for free
+          } @else {
+            Pay with Razorpay
+          }
         }
       </button>
       @if (paymentError(); as err) {

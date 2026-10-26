@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { VenueStore } from '../services/venue.store';
 import { ApiService } from '../services/api.service';
 import { VIP_MULTIPLIER } from '../constants';
+import { VenueTicket } from '../models';
 import { Icon } from './icon';
 import { environment } from '../../environments/environment';
 
@@ -104,6 +105,10 @@ export class CheckoutModal {
     return this.roundCurrency(this.unitPrice() * this.quantity());
   }
 
+  isFree(): boolean {
+    return this.total() === 0;
+  }
+
   vipPrice(): number {
     const event = this.event();
     return event
@@ -135,23 +140,39 @@ export class CheckoutModal {
     const event = this.event();
     const total = this.total();
     if (!event || this.processing()) return;
-    if (!Number.isFinite(total) || total <= 0 || !Number.isInteger(this.quantity())) {
+    if (!Number.isFinite(total) || total < 0 || !Number.isInteger(this.quantity())) {
       this.paymentError.set('Unable to calculate the order amount.');
-      return;
-    }
-    if (!environment.razorpayKeyId.startsWith('rzp_test_')) {
-      this.paymentError.set('Razorpay Test Mode key is not configured.');
       return;
     }
 
     this.processing.set(true);
     this.paymentError.set(null);
 
-    this.api.createRazorpayOrder({
+    const purchase = {
       eventId: Number(event.id),
       quantity: this.quantity(),
       ticketType: this.ticketType(),
-    }).subscribe({
+    };
+
+    if (total === 0) {
+      this.api.registerFreeTicket(purchase).subscribe({
+        next: (ticket) => this.completeBooking(ticket, String(event.id)),
+        error: (err) => {
+          console.error('Unable to register free ticket.', err);
+          this.processing.set(false);
+          this.paymentError.set('Unable to register. Please check ticket availability and try again.');
+        },
+      });
+      return;
+    }
+
+    if (!environment.razorpayKeyId.startsWith('rzp_test_')) {
+      this.processing.set(false);
+      this.paymentError.set('Razorpay Test Mode key is not configured.');
+      return;
+    }
+
+    this.api.createRazorpayOrder(purchase).subscribe({
       next: (order) => {
         loadRazorpayScript().then(() => {
           if (!window.Razorpay) {
@@ -200,21 +221,7 @@ export class CheckoutModal {
       razorpay_signature: payment.razorpay_signature,
     }).subscribe({
       next: (ticket) => {
-        this.processing.set(false);
-        this.store.addTicket({
-          id: String(ticket.id),
-          eventId: String(ticket.eventId),
-          eventTitle: ticket.eventTitle,
-          eventDate: ticket.eventDate,
-          eventVenue: ticket.eventVenue,
-          ticketType: ticket.ticketType,
-          quantity: ticket.quantity,
-          unitPrice: ticket.unitPrice,
-          totalPrice: ticket.totalPrice,
-        });
-        this.store.incrementEventSoldCount(eventId, ticket.quantity);
-        this.close();
-        void this.router.navigateByUrl('/stash');
+        this.completeBooking(ticket, eventId);
       },
       error: (err) => {
         console.error('Razorpay payment verification failed.', err);
@@ -222,5 +229,23 @@ export class CheckoutModal {
         this.paymentError.set('Payment verification failed. Please contact support before trying again.');
       },
     });
+  }
+
+  private completeBooking(ticket: VenueTicket, eventId: string): void {
+    this.processing.set(false);
+    this.store.addTicket({
+      id: String(ticket.id),
+      eventId: String(ticket.eventId),
+      eventTitle: ticket.eventTitle,
+      eventDate: ticket.eventDate,
+      eventVenue: ticket.eventVenue,
+      ticketType: ticket.ticketType,
+      quantity: ticket.quantity,
+      unitPrice: ticket.unitPrice,
+      totalPrice: ticket.totalPrice,
+    });
+    this.store.incrementEventSoldCount(eventId, ticket.quantity);
+    this.close();
+    void this.router.navigateByUrl('/stash');
   }
 }

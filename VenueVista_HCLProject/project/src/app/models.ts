@@ -45,6 +45,12 @@ export interface RazorpayOrderRequest {
   ticketType: 'GA' | 'VIP';
 }
 
+export interface FreeTicketRegistrationRequest {
+  eventId: number;
+  quantity: number;
+  ticketType: 'GA' | 'VIP';
+}
+
 export interface RazorpayOrder {
   orderId: string;
   amount: number;

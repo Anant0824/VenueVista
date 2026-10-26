@@ -54,6 +54,42 @@ public class TicketService {
     }
 
     @Transactional
+    public TicketResponseDto registerFreeTicket(PurchaseRequestDto request, String buyerUsername) {
+        if (request.getQuantity() <= 0 || request.getQuantity() > 10) {
+            throw new IllegalArgumentException("Quantity must be between 1 and 10.");
+        }
+
+        Event event = eventRepository.findByIdWithLock(request.getEventId())
+                .orElseThrow(() -> new IllegalArgumentException("Event not found with ID: " + request.getEventId()));
+        String ticketType = normalizeTicketType(request.getTicketType());
+        BigDecimal unitPrice = calculateUnitPrice(event, ticketType);
+        if (unitPrice.signum() != 0) {
+            throw new IllegalArgumentException("Free registration is only available for zero-price tickets.");
+        }
+
+        if (event.getCapacity() - event.getSoldCount() < request.getQuantity()) {
+            throw new IllegalStateException("Not enough tickets are available.");
+        }
+
+        Ticket ticket = new Ticket();
+        ticket.setEventId(event.getId());
+        ticket.setBuyerUsername(buyerUsername);
+        ticket.setEventTitle(event.getTitle());
+        ticket.setEventDate(event.getDate().toString());
+        ticket.setEventVenue(event.getVenue());
+        ticket.setTicketType(ticketType);
+        ticket.setQuantity(request.getQuantity());
+        ticket.setUnitPrice(unitPrice);
+        ticket.setTotalPrice(unitPrice.multiply(BigDecimal.valueOf(request.getQuantity())));
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        event.setSoldCount(event.getSoldCount() + request.getQuantity());
+        eventRepository.save(event);
+
+        return toResponse(savedTicket);
+    }
+
+    @Transactional
     public RazorpayOrder createRazorpayOrderRecord(
             String orderId,
             PurchaseRequestDto request,

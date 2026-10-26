@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE } from '../constants';
 import {
   EventPayload,
+  FreeTicketRegistrationRequest,
   ManagedUser,
   RazorpayOrder,
   RazorpayOrderRequest,
@@ -36,6 +37,10 @@ export class ApiService {
 
   getTickets(): Observable<VenueTicket[]> {
     return this.http.get<VenueTicket[]>(this.ticketsUrl);
+  }
+
+  registerFreeTicket(payload: FreeTicketRegistrationRequest): Observable<VenueTicket> {
+    return this.http.post<VenueTicket>(`${this.ticketsUrl}/register-free`, payload);
   }
 
   createRazorpayOrder(payload: RazorpayOrderRequest): Observable<RazorpayOrder> {
