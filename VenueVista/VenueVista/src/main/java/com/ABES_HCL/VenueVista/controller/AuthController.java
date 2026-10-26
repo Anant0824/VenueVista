@@ -5,6 +5,8 @@ import com.ABES_HCL.VenueVista.entity.User;
 import com.ABES_HCL.VenueVista.repository.UserRepository;
 import com.ABES_HCL.VenueVista.security.JwtUtil;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +24,9 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -47,11 +50,15 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
             );
         } catch (AuthenticationException exception) {
+            LOGGER.warn("Login authentication failed: exceptionType={}", exception.getClass().getName());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect username or password");
         }
 
         User user = userRepository.findByUsername(authRequest.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect username or password"));
+                .orElseThrow(() -> {
+                    LOGGER.warn("Login user lookup failed after successful authentication.");
+                    return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect username or password");
+                });
         return ResponseEntity.ok(authenticationResponse(user));
     }
 

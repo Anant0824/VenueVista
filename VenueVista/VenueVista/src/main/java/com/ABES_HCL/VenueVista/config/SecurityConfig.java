@@ -1,10 +1,15 @@
 package com.ABES_HCL.VenueVista.config;
 
+import com.ABES_HCL.VenueVista.security.AuthRequestDiagnosticFilter;
 import com.ABES_HCL.VenueVista.security.JwtRequestFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -17,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -24,8 +30,13 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
+
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
+
+    @Autowired
+    private AuthRequestDiagnosticFilter authRequestDiagnosticFilter;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -35,6 +46,20 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults()) // Enable CORS
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless REST APIs
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            logSecurityFailure("authentication", request, exception);
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\":\"Authentication is required.\"}");
+                        })
+                        .accessDeniedHandler((request, response, exception) -> {
+                            logSecurityFailure("authorization", request, exception);
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\":\"Access is denied.\"}");
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight checks
                         .requestMatchers("/api/auth/**").permitAll()         // Allow login/signup
@@ -53,6 +78,7 @@ public class SecurityConfig {
                 );
 
         // Register our custom JWT token validation filter
+        http.addFilterBefore(authRequestDiagnosticFilter, CorsFilter.class);
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -79,5 +105,24 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
+    }
+
+    private void logSecurityFailure(
+            String failureType,
+            HttpServletRequest request,
+            Exception exception
+    ) {
+        LOGGER.warn(
+                "Spring Security {} failure: method={}, path={}, origin={}, contentType={}, " +
+                        "authorizationPresent={}, cookiePresent={}, exceptionType={}",
+                failureType,
+                request.getMethod(),
+                request.getRequestURI(),
+                request.getHeader("Origin"),
+                request.getHeader("Content-Type"),
+                request.getHeader("Authorization") != null,
+                request.getHeader("Cookie") != null,
+                exception.getClass().getName()
+        );
     }
 }
