@@ -17,10 +17,10 @@ import java.util.Set;
 
 @Configuration
 public class DataSeeder {
-    @Value("${venuevista.admin.reset-users:false}")
-    private boolean resetUsers;
+    @Value("${venuevista.admin.seed-enabled:${venuevista.admin.reset-users:false}}")
+    private boolean seedAdmin;
 
-    @Value("${venuevista.admin.username:}")
+    @Value("${venuevista.admin.username:anant}")
     private String adminUsername;
 
     @Value("${venuevista.admin.email:}")
@@ -58,21 +58,30 @@ public class DataSeeder {
             PlatformTransactionManager transactionManager
     ) {
         return args -> {
-            if (!resetUsers) {
+            if (!seedAdmin) {
                 return;
             }
 
-            if (!StringUtils.hasText(adminUsername)
-                    || !StringUtils.hasText(adminEmail)
+            if (!StringUtils.hasText(adminUsername)) {
+                throw new IllegalStateException("Set venuevista.admin.username before enabling admin seeding.");
+            }
+
+            String username = adminUsername.trim();
+            if (userRepository.existsByUsername(username)) {
+                System.out.println("VenueVista: admin account already exists; skipping seed.");
+                return;
+            }
+
+            if (!StringUtils.hasText(adminEmail)
                     || adminPassword == null
                     || adminPassword.length() < 16) {
                 throw new IllegalStateException(
-                        "Set venuevista.admin.username, venuevista.admin.email, and a password of at least 16 characters before enabling the user reset."
+                        "Set venuevista.admin.email and venuevista.admin.password (at least 16 characters) before enabling venuevista.admin.seed-enabled."
                 );
             }
 
             User admin = User.builder()
-                    .username(adminUsername.trim())
+                    .username(username)
                     .email(adminEmail.trim().toLowerCase())
                     .password(passwordEncoder.encode(adminPassword))
                     .role("ROLE_ADMIN")
@@ -80,10 +89,9 @@ public class DataSeeder {
                     .build();
 
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-                userRepository.deleteAll();
                 userRepository.save(admin);
             });
-            System.out.println("VenueVista: configured admin account seeded; existing users were removed.");
+            System.out.println("VenueVista: configured admin account seeded.");
         };
     }
 }

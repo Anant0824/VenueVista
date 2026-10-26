@@ -24,7 +24,7 @@ public class AdminController {
 
     public AdminController(
             UserRepository userRepository,
-            @Value("${venuevista.admin.username:admin}") String masterAdminUsername
+            @Value("${venuevista.admin.username:anant}") String masterAdminUsername
     ) {
         this.userRepository = userRepository;
         this.masterAdminUsername = masterAdminUsername;
