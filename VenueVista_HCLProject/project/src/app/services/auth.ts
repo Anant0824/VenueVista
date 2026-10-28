@@ -36,7 +36,10 @@ export class AuthService {
 
   login(credentials: { username: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${API_BASE}/auth/login`, credentials).pipe(
-      tap((response) => this.saveSession(response)),
+      tap((response) => {
+        this.logSuccessfulLogin(response);
+        this.saveSession(response);
+      }),
     );
   }
 
@@ -57,6 +60,39 @@ export class AuthService {
     this.currentUserRole.set(response.role);
     this.currentUsername.set(response.username);
     this.venueStore.load();
+  }
+
+  private logSuccessfulLogin(response: AuthResponse): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    console.info('[Auth debug] Login response (token redacted):', {
+      ...response,
+      token: '[REDACTED]',
+    });
+
+    try {
+      const payloadSegment = response.token.split('.')[1];
+      if (!payloadSegment) {
+        throw new Error('JWT payload is missing.');
+      }
+
+      const base64Payload = payloadSegment
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+        .padEnd(Math.ceil(payloadSegment.length / 4) * 4, '=');
+      const payloadBytes = Uint8Array.from(atob(base64Payload), (character) => character.charCodeAt(0));
+      const claims = JSON.parse(new TextDecoder().decode(payloadBytes)) as Record<string, unknown>;
+
+      console.info('[Auth debug] Decoded JWT claims:', claims);
+      console.info('[Auth debug] Role supplied by backend:', response.role);
+      if (claims['role'] !== response.role) {
+        console.warn('[Auth debug] Backend response role does not match JWT role claim.');
+      }
+    } catch (error) {
+      console.warn('[Auth debug] Unable to decode login JWT payload.', error);
+    }
   }
 
   logout(): void {
