@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.DefaultCorsProcessor;
@@ -21,8 +23,20 @@ class VenueVistaApplicationTests {
 	@Autowired
 	private CorsConfigurationSource corsConfigurationSource;
 
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	void authenticatesSeededAdminWithSharedBcryptPasswordEncoder() {
+		var authentication = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken("anant", "test-password-with-at-least-16-chars")
+		);
+
+		assertTrue(authentication.isAuthenticated());
 	}
 
 	@Test
