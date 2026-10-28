@@ -52,6 +52,7 @@ class DataSeederTest {
                         && user.getRoles().equals(Set.of("ROLE_ADMIN"))
                         && user.getPassword().equals("encoded-password")
         ));
+        verify(passwordEncoder).encode("a-secure-password-with-16-chars");
         verify(transactionManager).commit(transactionStatus);
     }
 }
