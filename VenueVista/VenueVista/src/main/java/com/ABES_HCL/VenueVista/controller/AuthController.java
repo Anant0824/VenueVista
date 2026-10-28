@@ -45,7 +45,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> createAuthenticationToken(@RequestBody AuthRequest authRequest) {
-        LOGGER.info("Login request received for username='{}'", authRequest.getUsername());
+        int passwordLength = authRequest.getPassword() == null ? -1 : authRequest.getPassword().length();
+        LOGGER.info(
+                "Login request received for username='{}', passwordLength={}",
+                authRequest.getUsername(),
+                passwordLength
+        );
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
