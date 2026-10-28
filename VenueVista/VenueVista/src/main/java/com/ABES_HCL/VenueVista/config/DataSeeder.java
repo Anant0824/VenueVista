@@ -17,9 +17,6 @@ import java.util.Set;
 
 @Configuration
 public class DataSeeder {
-    @Value("${venuevista.admin.seed-enabled:${venuevista.admin.reset-users:false}}")
-    private boolean seedAdmin;
-
     @Value("${venuevista.admin.username:anant}")
     private String adminUsername;
 
@@ -36,50 +33,26 @@ public class DataSeeder {
     }
 
     @Bean
-    public CommandLineRunner migrateLegacyUserRoles(JdbcTemplate jdbcTemplate) {
-        return args -> jdbcTemplate.update("""
-                INSERT INTO user_roles (user_id, role)
-                SELECT users.id, users.role
-                FROM users
-                WHERE users.role IS NOT NULL
-                  AND NOT EXISTS (
-                      SELECT 1
-                      FROM user_roles
-                      WHERE user_roles.user_id = users.id
-                        AND user_roles.role = users.role
-                  )
-                """);
-    }
-
-    @Bean
     public CommandLineRunner seedUsers(
             UserRepository userRepository,
+            JdbcTemplate jdbcTemplate,
             PasswordEncoder passwordEncoder,
             PlatformTransactionManager transactionManager
     ) {
         return args -> {
-            if (!seedAdmin) {
-                return;
-            }
-
             if (!StringUtils.hasText(adminUsername)) {
-                throw new IllegalStateException("Set venuevista.admin.username before enabling admin seeding.");
-            }
-
-            String username = adminUsername.trim();
-            if (userRepository.existsByUsername(username)) {
-                System.out.println("VenueVista: admin account already exists; skipping seed.");
-                return;
+                throw new IllegalStateException("Set VENUEVISTA_ADMIN_USERNAME before starting the application.");
             }
 
             if (!StringUtils.hasText(adminEmail)
                     || adminPassword == null
                     || adminPassword.length() < 16) {
                 throw new IllegalStateException(
-                        "Set venuevista.admin.email and venuevista.admin.password (at least 16 characters) before enabling venuevista.admin.seed-enabled."
+                        "Set VENUEVISTA_ADMIN_EMAIL and VENUEVISTA_ADMIN_PASSWORD (at least 16 characters) before starting the application."
                 );
             }
 
+            String username = adminUsername.trim();
             User admin = User.builder()
                     .username(username)
                     .email(adminEmail.trim().toLowerCase())
@@ -89,9 +62,11 @@ public class DataSeeder {
                     .build();
 
             new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                jdbcTemplate.update("DELETE FROM user_roles");
+                jdbcTemplate.update("DELETE FROM users");
                 userRepository.save(admin);
             });
-            System.out.println("VenueVista: configured admin account seeded.");
+            System.out.println("VenueVista: users and roles reset; super admin seeded.");
         };
     }
 }

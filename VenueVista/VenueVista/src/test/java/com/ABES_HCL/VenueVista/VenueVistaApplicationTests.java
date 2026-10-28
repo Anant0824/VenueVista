@@ -12,7 +12,10 @@ import org.springframework.web.cors.DefaultCorsProcessor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+		"venuevista.admin.email=admin-test@example.com",
+		"venuevista.admin.password=test-password-with-at-least-16-chars"
+})
 class VenueVistaApplicationTests {
 
 	@Autowired
