@@ -6,6 +6,7 @@ import jakarta.validation.Valid; // Import jakarta validation
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -17,7 +18,7 @@ public class EventController {
 
     @GetMapping
     public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+        return eventRepository.findByDateGreaterThanEqual(LocalDate.now());
     }
 
     @PostMapping
