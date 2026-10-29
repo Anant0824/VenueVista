@@ -15,8 +15,8 @@ export class Navbar {
     return !!this.authService.currentToken();
   }
 
-  isCreator(): boolean {
-    return this.authService.currentUserRole() === 'ROLE_CREATOR';
+  isAdmin(): boolean {
+    return this.authService.currentUserRole() === 'ROLE_ADMIN';
   }
 
   get navItems() {
@@ -25,7 +25,7 @@ export class Navbar {
       { label: 'My Stash', path: '/stash' },
     ];
 
-    if (this.isCreator()) {
+    if (this.isAdmin()) {
       items.push({ label: 'Control Room', path: '/control-room' });
     }
 
