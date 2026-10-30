@@ -4,6 +4,7 @@ import { VenueStore } from '../services/venue.store';
 import { ApiService } from '../services/api.service';
 import { ManagedUser } from '../models';
 import { Icon } from '../components/icon';
+import { AuthService } from '../services/auth';
 
 @Component({
   selector: 'app-control-room-view',
@@ -13,6 +14,7 @@ import { Icon } from '../components/icon';
 export class ControlRoomView {
   private readonly store = inject(VenueStore);
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
 
   readonly events = this.store.events;
   readonly tickets = this.store.tickets;
@@ -49,6 +51,10 @@ export class ControlRoomView {
     () => 0 + this.tickets().reduce((s, t) => s + t.quantity, 0),
   );
   readonly activeEvents = computed(() => this.events().length);
+
+  canManageUser(user: ManagedUser): boolean {
+    return !user.superAdmin && user.username !== this.auth.currentUsername();
+  }
 
   selectTab(tab: 'events' | 'users'): void {
     this.activeTab.set(tab);
@@ -96,14 +102,15 @@ export class ControlRoomView {
     });
   }
 
-  promoteUser(user: ManagedUser): void {
-    if (this.updatingUserId() !== null || user.role === 'ROLE_ADMIN') {
+  toggleAdminRole(user: ManagedUser): void {
+    if (this.updatingUserId() !== null || !this.canManageUser(user)) {
       return;
     }
 
+    const role = user.role === 'ROLE_ADMIN' ? 'ROLE_USER' : 'ROLE_ADMIN';
     this.updatingUserId.set(user.id);
     this.userError.set(null);
-    this.api.promoteUser(String(user.id)).subscribe({
+    this.api.updateUserRole(user.id, role).subscribe({
       next: (updatedUser) => {
         this.users.update((users) =>
           users.map((currentUser) => currentUser.id === updatedUser.id ? updatedUser : currentUser),
@@ -111,8 +118,8 @@ export class ControlRoomView {
         this.updatingUserId.set(null);
       },
       error: (err) => {
-        console.error(`Failed to promote user ${user.id} to admin.`, err);
-        this.userError.set(`Unable to promote ${user.username} to admin. Please verify master admin access and try again.`);
+        console.error(`Failed to update the admin role for user ${user.id}.`, err);
+        this.userError.set(`Unable to update ${user.username}'s admin role. Please try again.`);
         this.updatingUserId.set(null);
       },
     });

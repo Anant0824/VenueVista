@@ -69,6 +69,7 @@ export interface ManagedUser {
   email: string | null;
   role: 'ROLE_USER' | 'ROLE_CREATOR' | 'ROLE_ADMIN';
   roles: string[];
+  superAdmin: boolean;
 }
 
 export interface Accent {

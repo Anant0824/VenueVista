@@ -35,10 +35,6 @@ export class ApiService {
     return this.http.put<ManagedUser>(`${API_BASE}/users/${id}/role`, { role });
   }
 
-  promoteUser(userId: string): Observable<ManagedUser> {
-    return this.http.post<ManagedUser>(`${API_BASE}/admin/promote/${userId}`, null);
-  }
-
   getTickets(): Observable<VenueTicket[]> {
     return this.http.get<VenueTicket[]>(this.ticketsUrl);
   }

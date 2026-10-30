@@ -211,7 +211,7 @@
                     </span>
                   </td>
                   <td class="px-4 py-4 text-right">
-                    @if (user.role !== 'ROLE_ADMIN') {
+                    @if (canManageUser(user)) {
                       <div class="flex justify-end gap-2">
                         <button
                           type="button"
@@ -229,12 +229,14 @@
                         </button>
                         <button
                           type="button"
-                          (click)="promoteUser(user)"
+                          (click)="toggleAdminRole(user)"
                           [disabled]="updatingUserId() !== null"
                           class="px-4 py-2 rounded-lg border border-electric-purple/30 bg-electric-purple/10 text-xs font-mono text-electric-purple hover:border-electric-purple/60 hover:text-white disabled:opacity-50 transition-colors"
                         >
                           @if (updatingUserId() === user.id) {
                             Updating...
+                          } @else if (user.role === 'ROLE_ADMIN') {
+                            Demote to User
                           } @else {
                             Promote to Admin
                           }
