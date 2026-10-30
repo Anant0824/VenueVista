@@ -43,6 +43,6 @@ public class AdminController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
         user.getRoles().add(ADMIN_ROLE);
         userRepository.save(user);
-        return UserDto.from(user);
+        return UserDto.from(user, masterAdminUsername);
     }
 }

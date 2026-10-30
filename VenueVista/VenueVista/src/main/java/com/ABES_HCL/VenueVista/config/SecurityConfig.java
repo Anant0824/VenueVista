@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight checks
                         .requestMatchers("/api/auth/**").permitAll()         // Allow login/signup
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/role").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("CREATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyRole("CREATOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll() // Allow public event viewing on load

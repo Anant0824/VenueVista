@@ -5,7 +5,10 @@ import com.ABES_HCL.VenueVista.dto.UserRoleUpdateRequest;
 import com.ABES_HCL.VenueVista.entity.User;
 import com.ABES_HCL.VenueVista.repository.UserRepository;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,15 +23,20 @@ import java.util.List;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final String superAdminUsername;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(
+            UserRepository userRepository,
+            @Value("${venuevista.admin.username:anant}") String superAdminUsername
+    ) {
         this.userRepository = userRepository;
+        this.superAdminUsername = superAdminUsername.trim();
     }
 
     @GetMapping
     public List<UserDto> getUsers() {
         return userRepository.findAll().stream()
-                .map(UserDto::from)
+                .map(user -> UserDto.from(user, superAdminUsername))
                 .toList();
     }
 
@@ -38,15 +46,18 @@ public class UserController {
             @Valid @RequestBody UserRoleUpdateRequest request
     ) {
         return userRepository.findById(id)
-                .map(user -> updateRole(user, request.role()))
-                .map(userRepository::save)
-                .map(UserDto::from)
+                .map(user -> {
+                    if (superAdminUsername.equals(user.getUsername())) {
+                        throw new ResponseStatusException(
+                                HttpStatus.FORBIDDEN,
+                                "The seeded super admin role cannot be changed."
+                        );
+                    }
+                    user.setRole(request.role());
+                    return userRepository.save(user);
+                })
+                .map(user -> UserDto.from(user, superAdminUsername))
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    private User updateRole(User user, String role) {
-        user.setRole(role);
-        return user;
     }
 }
